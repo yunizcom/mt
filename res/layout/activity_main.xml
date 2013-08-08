@@ -24,21 +24,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
             android:src="@drawable/ic_launcher" />
-        
-        <ImageView
-            android:id="@+id/titan2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:src="@drawable/ic_launcher" />
-        
-        <ImageView
-            android:id="@+id/titan3"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:src="@drawable/ic_launcher" />
-        
+
         <TextView
             android:id="@+id/gameScore"
             android:layout_width="wrap_content"
@@ -47,7 +33,7 @@
             android:layout_alignParentRight="true"
             android:layout_marginTop="6dp"
             android:layout_marginRight="10dp"
-            android:text="SCORE : 0 Titans"
+            android:text="SCORE : 0 Minions"
             android:textColor="#e10f0f"
             android:textStyle="bold"
             android:textSize="20dp" />
@@ -565,15 +551,6 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true" >
 
-        <ImageView
-            android:id="@+id/logo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true"
-            android:layout_marginBottom="27dp"
-            android:src="@drawable/ic_launcher" />
-
         <Button
             android:id="@+id/button3"
             style="?android:attr/buttonStyleSmall"
@@ -582,21 +559,19 @@
             android:layout_alignParentBottom="true"
             android:layout_centerHorizontal="true"
             android:background="@null"
-            android:minHeight="18dp"
+            android:minHeight="10dp"
             android:onClick="openURL"
-            android:text="Copyright by PONY CANYON | Developed by Yuniz.com"
+            android:text="Copyright by Universal Pictures | Developed by Yuniz.com"
             android:textColor="#ffffff"
-            android:textSize="12dp"
+            android:textSize="10dp"
             android:textStyle="bold" />
 
         <ImageView
             android:id="@+id/playBtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentTop="true"
-            android:layout_marginRight="15dp"
-            android:layout_marginTop="15dp"
+            android:layout_centerHorizontal="true"
+            android:layout_above="@+id/button3"
             android:onClick="playBtn"
             android:src="@drawable/ic_launcher" />
 
@@ -604,8 +579,8 @@
             android:id="@+id/quitBtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignRight="@+id/playBtn"
-            android:layout_below="@+id/playBtn"
+            android:layout_toRightOf="@+id/playBtn"
+            android:layout_above="@+id/button3"
             android:onClick="quitBtn"
             android:src="@drawable/ic_launcher" />
         
@@ -614,8 +589,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_toLeftOf="@+id/playBtn"
-            android:layout_alignParentTop="true"
-            android:layout_marginTop="15dp"
+            android:layout_above="@+id/button3"
             android:onClick="openHallOfFameBtn"
             android:src="@drawable/ic_launcher" />
 

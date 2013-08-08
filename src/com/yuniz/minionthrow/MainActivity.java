@@ -1,9 +1,26 @@
 package com.yuniz.minionthrow;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import java.util.Timer;
+
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import com.yuniz.minionthrow.R;
 
@@ -20,17 +37,24 @@ import android.content.Intent;
 import android.content.res.AssetFileDescriptor;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;
+import android.util.Log;
 import android.view.Display;
+import android.view.GestureDetector;
 import android.view.Menu;
+import android.view.MotionEvent;
 import android.view.OrientationEventListener;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.GestureDetector.OnGestureListener;
+import android.view.animation.Animation;
+import android.view.animation.TranslateAnimation;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements OnGestureListener{
 	
 	public int screenWidth = 0;
 	public int screenHeight = 0;
@@ -51,7 +75,7 @@ public class MainActivity extends Activity {
 	
 	public int totalHits = 0;
 	
-	private int previousX = 0;
+	private float previousX = 0;
 	
 	private String curPosistion = "0";
 	private String curPage = "1";
@@ -64,7 +88,6 @@ public class MainActivity extends Activity {
 	private RelativeLayout gameOver;
 	private RelativeLayout hallOfFameBoard;
 	
-	private ImageView logo;
 	private ImageView playBtn;
 	private ImageView quitBtn;
 	private ImageView startBtn;
@@ -80,8 +103,6 @@ public class MainActivity extends Activity {
 	private ImageView human;
 	
 	private ImageView titan1;
-	private ImageView titan2;
-	private ImageView titan3;
 	
 	private TextView gameScore;
 	private TextView resultTxt;
@@ -119,6 +140,7 @@ public class MainActivity extends Activity {
 	private TextView txtNick10;
 	private TextView txtScore10;
 	
+	private GestureDetector gDetector;
 	
 	MediaPlayer bgMusic;
 	MediaPlayer clickEffect;
@@ -167,7 +189,6 @@ public class MainActivity extends Activity {
 		gameOver = (RelativeLayout) findViewById(R.id.gameOver);
 		hallOfFameBoard = (RelativeLayout) findViewById(R.id.hallOfFameBoard);
 		
-		logo = (ImageView) findViewById(R.id.logo);
 		playBtn = (ImageView) findViewById(R.id.playBtn);
 		quitBtn = (ImageView) findViewById(R.id.quitBtn);
 		startBtn = (ImageView) findViewById(R.id.startBtn);
@@ -183,8 +204,6 @@ public class MainActivity extends Activity {
 		human = (ImageView) findViewById(R.id.human);
 		
 		titan1 = (ImageView) findViewById(R.id.titan1);
-		titan2 = (ImageView) findViewById(R.id.titan2);
-		titan3 = (ImageView) findViewById(R.id.titan3);
 		
 		gameScore = (TextView) findViewById(R.id.gameScore);
 		resultTxt = (TextView) findViewById(R.id.resultTxt);
@@ -226,13 +245,13 @@ public class MainActivity extends Activity {
 		
 		try 
 		{
-		    InputStream ims = getAssets().open("menu_bg.jpg");
+		    InputStream ims = getAssets().open("menu.jpg");
 		    Drawable d = Drawable.createFromStream(ims, null);
 		    
 		    InputStream ims2 = getAssets().open("stage_1.jpg");
 		    Drawable d2 = Drawable.createFromStream(ims2, null);
 		    
-		    InputStream ims3 = getAssets().open("infors.jpg");
+		    InputStream ims3 = getAssets().open("intro.jpg");
 		    Drawable d3 = Drawable.createFromStream(ims3, null);
 		    
 		    InputStream ims4 = getAssets().open("gameover.jpg");
@@ -252,12 +271,8 @@ public class MainActivity extends Activity {
 		    	hallOfFameBoard.setBackground(d4);
 		    }
 		    
-		    InputStream ims1 = getAssets().open("logo.png");
+		    InputStream ims1 = getAssets().open("playBtn.png");
 		    Drawable d1 = Drawable.createFromStream(ims1, null);
-		    logo.setImageDrawable(d1);
-		    
-		    ims1 = getAssets().open("playBtn.png");
-		    d1 = Drawable.createFromStream(ims1, null);
 		    playBtn.setImageDrawable(d1);
 		    playBtn2.setImageDrawable(d1);
 		    
@@ -290,19 +305,11 @@ public class MainActivity extends Activity {
 		    d1 = Drawable.createFromStream(ims1, null);
 		    boardPrevBtn.setImageDrawable(d1);
 		    
-		    ims1 = getAssets().open("g" + generateNumber(1,4) + "_" + generateNumber(1,2) + ".png");
+		    ims1 = getAssets().open("dustbin.png");
 		    d1 = Drawable.createFromStream(ims1, null);
 		    titan1.setImageDrawable(d1);
 		    
-		    ims1 = getAssets().open("g" + generateNumber(1,4) + "_" + generateNumber(1,2) + ".png");
-		    d1 = Drawable.createFromStream(ims1, null);
-		    titan2.setImageDrawable(d1);
-    
-		    ims1 = getAssets().open("g" + generateNumber(1,4) + "_" + generateNumber(1,2) + ".png");
-		    d1 = Drawable.createFromStream(ims1, null);
-		    titan3.setImageDrawable(d1);
-		    
-		    ims1 = getAssets().open("human_1.png");
+		    ims1 = getAssets().open("minion_7.png");
 		    d1 = Drawable.createFromStream(ims1, null);
 		    human.setImageDrawable(d1);
 		}
@@ -315,13 +322,6 @@ public class MainActivity extends Activity {
 		if(smallScreen == true){
 			human.setAdjustViewBounds(true);
 		}
-		
-		setNewWidth = screenWidth * 0.7;
-		setNewHeight = screenHeight * 0.4;
-		logo.setMinimumHeight((int)setNewHeight);
-		logo.setMaxHeight((int)setNewHeight);
-		logo.setMinimumWidth((int)setNewWidth);
-		logo.setMaxWidth((int)setNewWidth);
 		
 		setNewWidth = screenWidth * 0.35;
 		setNewHeight = screenHeight * 0.2;
@@ -367,7 +367,7 @@ public class MainActivity extends Activity {
 		playBtn2.setMinimumWidth((int)setNewWidth);
 		playBtn2.setMaxWidth((int)setNewWidth);
 		
-		setNewWidth = screenWidth * 0.07;
+		setNewWidth = screenWidth * 0.10;
 		setNewHeight = screenHeight * 0.15;
 		boardNextBtn.setMinimumHeight((int)setNewHeight);
 		boardNextBtn.setMaxHeight((int)setNewHeight);
@@ -383,31 +383,20 @@ public class MainActivity extends Activity {
 		mynickName.setMinimumWidth((int)setNewWidth);
 		mynickName.setMaxWidth((int)setNewWidth);
 		
-		setNewWidth = screenWidth * 0.5;
+		setNewWidth = screenWidth * 0.2;
 		setNewHeight = screenHeight * 0.4;
 		human.setMinimumHeight((int)setNewHeight);
 		human.setMaxHeight((int)setNewHeight);
 		human.setMinimumWidth((int)setNewWidth);
 		human.setMaxWidth((int)setNewWidth);
 		
-		setNewWidth = screenWidth * 0.1;
-		setNewHeight = screenHeight * 0.2;
+		setNewWidth = screenWidth * 0.05;
+		setNewHeight = screenHeight * 0.1;
 		titan1.setMinimumHeight((int)setNewHeight);
 		titan1.setMaxHeight((int)setNewHeight);
 		titan1.setMinimumWidth((int)setNewWidth);
 		titan1.setMaxWidth((int)setNewWidth);
-		
-		titan2.setMinimumHeight((int)setNewHeight);
-		titan2.setMaxHeight((int)setNewHeight);
-		titan2.setMinimumWidth((int)setNewWidth);
-		titan2.setMaxWidth((int)setNewWidth);
-		
-		titan3.setMinimumHeight((int)setNewHeight);
-		titan3.setMaxHeight((int)setNewHeight);
-		titan3.setMinimumWidth((int)setNewWidth);
-		titan3.setMaxWidth((int)setNewWidth);
-		
-		//logo.setAdjustViewBounds(true);
+
 		playBtn.setAdjustViewBounds(true);
 		quitBtn.setAdjustViewBounds(true);
 		startBtn.setAdjustViewBounds(true);
@@ -421,10 +410,7 @@ public class MainActivity extends Activity {
 		boardPrevBtn.setAdjustViewBounds(true);
 		
 		titan1.setAdjustViewBounds(true);
-		titan2.setAdjustViewBounds(true);
-		titan3.setAdjustViewBounds(true);
 		
-		//logo.setScaleType( ImageView.ScaleType.FIT_CENTER);
 		playBtn.setScaleType( ImageView.ScaleType.FIT_CENTER);
 		quitBtn.setScaleType( ImageView.ScaleType.FIT_CENTER);
 		startBtn.setScaleType( ImageView.ScaleType.FIT_CENTER);
@@ -440,19 +426,321 @@ public class MainActivity extends Activity {
 		human.setScaleType( ImageView.ScaleType.FIT_CENTER);
 		
 		titan1.setScaleType( ImageView.ScaleType.FIT_CENTER);
-		titan2.setScaleType( ImageView.ScaleType.FIT_CENTER);
-		titan3.setScaleType( ImageView.ScaleType.FIT_CENTER);
 		//----------auto Adjust UI Elements size----------
+		
+		gDetector = new GestureDetector(this);
 	}
 
+	public void moveHuman(float arg0){
+		arg0 = arg0 - (human.getWidth() / 2);
+		
+		previousX = arg0;
+		
+		Animation animation = new TranslateAnimation(previousX, arg0,0, 0);
+		animation.setDuration(1);
+		animation.setFillAfter(true);
+		human.startAnimation(animation);
+	}
+	
 	public int generateNumber(int startFrom, int stopAt){
 		Random r = new Random();
 		int i1=r.nextInt(stopAt-startFrom) + startFrom;
 		return i1;
 	}
 	
+	public void loadBoard(JSONArray jsoncontacts){
+		if(jsoncontacts.length() == 0 && Integer.parseInt(curPage) > 1){
+			backToLastBoard();
+			Toast.makeText(getApplicationContext(), "This is the last page of Hall Of Fame." , Toast.LENGTH_LONG).show();
+		}else{
+
+			for(int i=0;i < jsoncontacts.length();i++){						
+				
+	        	try {
+					JSONObject e = jsoncontacts.getJSONObject(i);
+					
+					if(e.getString("no") != "0"){
+						pushScoreToBoard((i+1), e.getString("no"), e.getString("n"), e.getString("s"));
+					}
+					
+				} catch (JSONException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+	        	
+			}
+		}
+	}
+	
+	public void pushScoreToBoard(int slotNo, String noNumber, String nickName, String scores){
+		
+		if(noNumber == "0"){
+			return;
+		}
+		
+		try {
+			nickName = new String(nickName.getBytes("ISO-8859-1"), "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		if(slotNo == 1){
+			txtNo1.setText(noNumber);
+			txtNick1.setText(nickName);
+			txtScore1.setText(scores);
+		}else if(slotNo == 2){
+			txtNo2.setText(noNumber);
+			txtNick2.setText(nickName);
+			txtScore2.setText(scores);
+		}else if(slotNo == 3){
+			txtNo3.setText(noNumber);
+			txtNick3.setText(nickName);
+			txtScore3.setText(scores);
+		}else if(slotNo == 4){
+			txtNo4.setText(noNumber);
+			txtNick4.setText(nickName);
+			txtScore4.setText(scores);
+		}else if(slotNo == 5){
+			txtNo5.setText(noNumber);
+			txtNick5.setText(nickName);
+			txtScore5.setText(scores);
+		}else if(slotNo == 6){
+			txtNo6.setText(noNumber);
+			txtNick6.setText(nickName);
+			txtScore6.setText(scores);
+		}else if(slotNo == 7){
+			txtNo7.setText(noNumber);
+			txtNick7.setText(nickName);
+			txtScore7.setText(scores);
+		}else if(slotNo == 8){
+			txtNo8.setText(noNumber);
+			txtNick8.setText(nickName);
+			txtScore8.setText(scores);
+		}else if(slotNo == 9){
+			txtNo9.setText(noNumber);
+			txtNick9.setText(nickName);
+			txtScore9.setText(scores);
+		}else if(slotNo == 10){
+			txtNo10.setText(noNumber);
+			txtNick10.setText(nickName);
+			txtScore10.setText(scores);
+		}
+	}
+	
+	public void gameScoreSubmitAPI(String nickname, int scores){
+		try {
+			nickname = URLEncoder.encode(nickname, "utf-8");
+		} catch (UnsupportedEncodingException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		String url = "http://www.yuniz.com/apps/aot/?mod=1&nickname=" + nickname + "&score=" + scores;
+		//-------load JSON
+		List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
+        //nameValuePairs.add(new BasicNameValuePair("convo_id", "4546db1fd1"));
+        //nameValuePairs.add(new BasicNameValuePair("say", words));
+
+		JSONObject json = getJSONfromURL(url, nameValuePairs);
+		try {
+			if(json == null){
+				Toast.makeText(getApplicationContext(), "You need internet connection to continue." , Toast.LENGTH_LONG).show();
+			}else{
+				curPosistion = json.getString("curPosistion");
+				curPage = json.getString("curPage");
+				breakRecords = json.getString("breakRecords");
+				
+				loadBoard(json.getJSONArray("hallOfFame"));
+				
+				gameOver.setVisibility(View.INVISIBLE);
+				hallOfFameBoard.setVisibility(View.VISIBLE);
+			}
+			
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		//-------load JSON
+	}
+	
+	public void gameScoresAPI(String pages){
+		String url = "http://www.yuniz.com/apps/aot/?mod=2&page=" + pages;
+		//-------load JSON
+		List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
+        //nameValuePairs.add(new BasicNameValuePair("convo_id", "4546db1fd1"));
+        //nameValuePairs.add(new BasicNameValuePair("say", words));
+		
+		JSONObject json = getJSONfromURL(url, nameValuePairs);
+		try {
+			if(json == null){
+				Toast.makeText(getApplicationContext(), "You need internet connection to continue." , Toast.LENGTH_LONG).show();
+			}else{
+				loadBoard(json.getJSONArray("hallOfFame"));
+			}
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		//-------load JSON
+	}
+	
+	public static JSONObject getJSONfromURL(String url,List<NameValuePair> postDatas ){
+
+		//initialize
+		InputStream is = null;
+		String result = "";
+		JSONObject jArray = null;
+
+		//http post
+		try{
+			HttpClient httpclient = new DefaultHttpClient();
+			HttpPost httppost = new HttpPost(url);
+			
+	        httppost.setEntity(new UrlEncodedFormEntity(postDatas));
+			
+			HttpResponse response = httpclient.execute(httppost);
+			HttpEntity entity = response.getEntity();
+			is = entity.getContent();
+
+		}catch(Exception e){
+			Log.e("log_tag", "Error in http connection "+e.toString());
+		}
+
+		//convert response to string
+		try{
+			BufferedReader reader = new BufferedReader(new InputStreamReader(is,"iso-8859-1"),8);
+			StringBuilder sb = new StringBuilder();
+			String line = null;
+			while ((line = reader.readLine()) != null) {
+				sb.append(line + "\n");
+			}
+			is.close();
+			result=sb.toString();
+		}catch(Exception e){
+			Log.e("log_tag", "Error converting result "+e.toString());
+		}
+
+		//try parse the string to a JSON object
+		try{
+	        	jArray = new JSONObject(result);
+		}catch(JSONException e){
+			Log.e("log_tag", "Error parsing data "+e.toString());
+		}
+
+		return jArray;
+	} 
+	
+	public void openHallOfFameBtn(View v) {
+		buttonClicks();
+		
+		if(!isNetworkAvailable()){
+			Toast.makeText(getApplicationContext(), "You need internet connection to open Hall Of Fame." , Toast.LENGTH_LONG).show();
+		}else{
+			totalHits = 0;
+			gameScore.setText("SCORE : 0 Minions");
+			
+			gameMenu.setVisibility(View.INVISIBLE);
+			hallOfFameBoard.setVisibility(View.VISIBLE);
+			
+			gameScoresAPI(curPage);
+		}
+	}
+	
+	public void boardNextBtn(View v) {
+		buttonClicks();
+
+		int nextPage = Integer.parseInt(curPage) + 1;
+		
+		curPage = Integer.toString(nextPage);
+		
+		gameScoresAPI(curPage);
+	}
+	
+	public void backToLastBoard(){
+		int nextPage = Integer.parseInt(curPage) - 1;
+		
+		if(nextPage<1){
+			nextPage = 1;
+		}
+		
+		curPage = Integer.toString(nextPage);
+		
+		//gameScoresAPI(curPage);
+	}
+	
+	public void boardPrevBtn(View v) {
+		buttonClicks();
+		
+		if(curPage == "1"){
+			Toast.makeText(getApplicationContext(), "These are the TOP 10 players." , Toast.LENGTH_LONG).show();
+		}else{
+
+			int nextPage = Integer.parseInt(curPage) - 1;
+			
+			if(nextPage<1){
+				nextPage = 1;
+			}
+			
+			curPage = Integer.toString(nextPage);
+			
+			gameScoresAPI(curPage);
+		}
+	}
+	
 	public void quitBtn(View v) {
 		finish();
+	}
+	
+	public void gameOver(){
+		t.cancel();
+		
+		resultTxt.setText(gameScore.getText());
+		
+		gameStage_human.setVisibility(View.INVISIBLE);
+		gameStage1.setVisibility(View.INVISIBLE);
+		gameOver.setVisibility(View.VISIBLE);
+	}
+	
+	public void startBtn(View v) {
+		buttonClicks();
+		
+		gameIntro.setVisibility(View.INVISIBLE);
+		gameStage_human.setVisibility(View.VISIBLE);
+		gameStage1.setVisibility(View.VISIBLE);
+	}
+	
+	public void rePlayBtn(View v) {
+		buttonClicks();
+		
+		totalHits = 0;
+		gameScore.setText("SCORE : 0 Minions");
+		
+		gameOver.setVisibility(View.INVISIBLE);
+		gameStage_human.setVisibility(View.VISIBLE);
+		gameStage1.setVisibility(View.VISIBLE);
+	}
+	
+	public void submitBtn(View v) {
+		buttonClicks();
+		
+		if(!isNetworkAvailable()){
+			Toast.makeText(getApplicationContext(), "You need internet connection to submit game score." , Toast.LENGTH_LONG).show();
+		}else{
+			if(mynickName.getText().toString().trim().length() == 0){
+				Toast.makeText(getApplicationContext(), "Please type your nickname." , Toast.LENGTH_LONG).show();
+			}else{
+				gameScoreSubmitAPI(mynickName.getText().toString(), totalHits);
+			}
+		}
+	}
+	
+	public void playBtn(View v) {
+		buttonClicks();
+		
+		totalHits = 0;
+		gameScore.setText("SCORE : 0 Minions");
+		
+		gameMenu.setVisibility(View.INVISIBLE);
+		gameIntro.setVisibility(View.VISIBLE);
 	}
 	
 	public void buttonClicks(){
@@ -614,6 +902,67 @@ public class MainActivity extends Activity {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.main, menu);
 		return true;
+	}
+	
+	@Override
+	public boolean onDown(MotionEvent arg0) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean onFling(MotionEvent start, MotionEvent finish, float xVelocity, float yVelocity) {
+		// TODO Auto-generated method stub
+        /*if (start.getRawY() < finish.getRawY()) {
+		    Log.v("DEBUG","Go DOWN(" + start.getRawY() + "|" + finish.getRawY() + ")");
+		} else {
+			Log.v("DEBUG","Go UP(" + start.getRawY() + "|" + finish.getRawY() + ")");
+		}
+        
+        if (start.getRawX() < finish.getRawX()) {
+		    Log.v("DEBUG","Go LEFT(" + start.getRawX() + "|" + finish.getRawX() + ")");
+		} else {
+			Log.v("DEBUG","Go RIGHT(" + start.getRawX() + "|" + finish.getRawX() + ")");
+		}*/
+		
+        //moveHuman(finish.getRawX());
+        
+		return false;
+	}
+
+	@Override
+	public void onLongPress(MotionEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public boolean onScroll(MotionEvent arg0, MotionEvent arg1, float arg2,
+			float arg3) {
+		// TODO Auto-generated method stub
+		 moveHuman(arg1.getRawX());
+		
+		return true;
+	}
+
+	@Override
+	public void onShowPress(MotionEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public boolean onSingleTapUp(MotionEvent arg0) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+	
+	@Override
+
+	public boolean onTouchEvent(MotionEvent me) {
+
+		return gDetector.onTouchEvent(me);
+
 	}
 
 }
