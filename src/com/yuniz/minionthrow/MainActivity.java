@@ -149,8 +149,7 @@ public class MainActivity extends Activity implements OnGestureListener{
 	
 	private GestureDetector gDetector;
 	
-	MediaPlayer bgMusic;
-	MediaPlayer clickEffect;
+	MediaPlayer bgMusic,clickEffect,throwEffect;
 	
 	Timer t = new Timer();
 	
@@ -249,6 +248,7 @@ public class MainActivity extends Activity implements OnGestureListener{
 		
 		bgMusic  = new MediaPlayer();
 		clickEffect  = new MediaPlayer();
+		throwEffect  = new MediaPlayer();
 		
 		try 
 		{
@@ -517,7 +517,7 @@ public class MainActivity extends Activity implements OnGestureListener{
 
 	            @Override
 	            public void onAnimationStart(Animation animation) {
-	                // TODO Auto-generated method stub
+	            	// TODO Auto-generated method stub
 	            }
 
 	            @Override
@@ -542,13 +542,23 @@ public class MainActivity extends Activity implements OnGestureListener{
 	    			if( ( curX > (float)curBasketXA && curX < (float)curBasketXB ) && ( curY > (float)curBasketYA && curY < (float)curBasketYB ) ){
 	    				initTitans(titan1,generateNumber(0,3));
 	    				
+	    				monionThrowSound();
+	    				
 	    				totalHits++;
 		    			gameScore.setText("SCORE : " + totalHits + " Minions");
 	    			}
 
+	    			reFreshMinions();
+	    			
 	    			canMoveNow = true;
 	    			
-	    			moveHuman((screenWidth/2), screenHeight - human.getHeight());
+	    			int backToNormalPos = (screenWidth/2) - (human.getWidth()/2);
+	    			Animation animation2 = new TranslateAnimation(backToNormalPos, backToNormalPos,0, 0);
+	    			
+	    			animation2.setDuration(0);
+	    			animation2.setFillAfter(true);
+	    			human.startAnimation(animation2);
+	    			
 	            }
 	        });
 	    	
@@ -571,6 +581,22 @@ public class MainActivity extends Activity implements OnGestureListener{
 		previousY = arg1;
 
 		
+	}
+	
+	public void reFreshMinions(){
+		String minionGIF = "minion_" + generateNumber(1,7) + ".png";
+		
+		try 
+		{
+		    InputStream ims1 = getAssets().open(minionGIF);
+		    Drawable d1 = Drawable.createFromStream(ims1, null);
+
+		    human.setImageDrawable(d1);
+		}
+		catch(IOException ex) 
+		{
+		    return;
+		}
 	}
 	
 	public int generateNumber(int startFrom, int stopAt){
@@ -920,6 +946,54 @@ public class MainActivity extends Activity implements OnGestureListener{
 			e.printStackTrace();
 		}
 		clickEffect.start();
+	}
+	
+	public void monionThrowSound(){
+		throwEffect.reset();
+		throwEffect.release();
+		throwEffect = null;
+    	
+		AssetFileDescriptor descriptor = null;
+		try {
+			descriptor = getAssets().openFd("throweffect.mp3");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		long start = descriptor.getStartOffset();
+		long end = descriptor.getLength();
+		
+		throwEffect = new MediaPlayer();
+		try {
+			throwEffect.setDataSource(descriptor.getFileDescriptor(), start, end);
+		} catch (IllegalArgumentException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalStateException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		try {
+			descriptor.close();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
+		try {
+			throwEffect.prepare();
+		} catch (IllegalStateException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		throwEffect.start();
 	}
 	
 	public void playBGMusic(String filename){
