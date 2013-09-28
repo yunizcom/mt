@@ -47,6 +47,9 @@ import android.view.View;
 import android.view.WindowManager;
 import android.view.GestureDetector.OnGestureListener;
 import android.view.animation.Animation;
+import android.view.animation.Animation.AnimationListener;
+import android.view.animation.AnimationSet;
+import android.view.animation.ScaleAnimation;
 import android.view.animation.TranslateAnimation;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -75,7 +78,11 @@ public class MainActivity extends Activity implements OnGestureListener{
 	
 	public int totalHits = 0;
 	
-	private float previousX = 0;
+	public int basketX,basketY;
+	
+	public boolean canMoveNow = true;
+	
+	private float previousX,previousY,curX,curY = 0;
 	
 	private String curPosistion = "0";
 	private String curPage = "1";
@@ -429,17 +436,141 @@ public class MainActivity extends Activity implements OnGestureListener{
 		//----------auto Adjust UI Elements size----------
 		
 		gDetector = new GestureDetector(this);
+		
+		initTitans(titan1,generateNumber(0,3));
 	}
 
-	public void moveHuman(float arg0){
+	public void initTitans(ImageView titanSelect, int locations){
+		
+		int curScaleSize = 1;
+		
+		switch(locations) {
+		    case 0:
+		        basketX = generateNumber(50,67);
+		        basketY = 75;
+		        break;
+		    case 1:
+		    	basketX = generateNumber(43,70);
+		        basketY = 80;
+		        break;
+		    case 2:
+		    	basketX = generateNumber(35,73);
+		        basketY = 90;
+		        curScaleSize = 2;
+		        break;    
+		    default:
+		    	basketX = generateNumber(40,70);
+		        basketY = generateNumber(70,80);
+		}
+		
+		int arg0 = (screenWidth / 100) * basketX;
+		int arg2 = (screenHeight / 100) * basketY;
+		
+		arg0 = arg0 - ( titanSelect.getWidth() / 2);
+		arg2 = arg2 - ( titanSelect.getHeight() / 2);
+		
+		Animation animationScale = new ScaleAnimation(curScaleSize, ( curScaleSize + 1 ), curScaleSize, ( curScaleSize + 1 ), Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.9f);
+    	animationScale.setDuration(0);
+
+    	Animation animationLoc = new TranslateAnimation(arg0, arg0,arg2, arg2);
+    	animationLoc.setDuration(0);
+
+		AnimationSet animSet = new AnimationSet(true);
+		animSet.setFillAfter(true);
+		animSet.addAnimation(animationScale);
+		animSet.addAnimation(animationLoc);
+		
+		titanSelect.startAnimation(animSet);
+	}
+	
+	public void moveHuman(float arg0, float arg1){
+		
+		if(canMoveNow == false){
+			return;
+		}
+		
 		arg0 = arg0 - (human.getWidth() / 2);
+		arg1 = arg1 + (human.getHeight() / 2);
+
+		arg1 = arg1 - screenHeight;
+	
+		curX = arg0;
+		curY = arg1;
+		
+		if((previousY - arg1) > 10 && arg1 < screenHeight){
+			canMoveNow = false;
+			int curScaleSize = 1;
+			
+			/*if(arg0 > (screenWidth/2)){
+				arg0 = arg0 - (screenWidth / 100 * 20);
+			}else{
+				arg0 = arg0 + (screenWidth / 100 * 20);
+			}*/
+			
+			Animation animationScale = new ScaleAnimation(( curScaleSize + 1 ), (int)(curScaleSize * 0.5), ( curScaleSize + 1 ), (int)(curScaleSize * 0.5), Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.9f);
+	    	animationScale.setDuration(500);
+
+	    	Animation animationLoc = new TranslateAnimation(previousX, arg0,arg1, arg1);
+	    	animationLoc.setDuration(500);
+	    	
+	    	animationLoc.setAnimationListener(new AnimationListener() {
+
+	            @Override
+	            public void onAnimationStart(Animation animation) {
+	                // TODO Auto-generated method stub
+	            }
+
+	            @Override
+	            public void onAnimationRepeat(Animation animation) {
+	                // TODO Auto-generated method stub
+	            }
+
+	            @Override
+	            public void onAnimationEnd(Animation animation) {
+	            	double curBasketX = ( (double)basketX - titan1.getWidth() ) / 100 * screenWidth;
+	    			double curBasketY = ( (double)basketY - titan1.getHeight() ) / 100 * screenHeight - screenHeight;
+
+	    			double basketRatio = 0.5;
+	    			double curBasketXA = (int)curBasketX - (titan1.getWidth() * basketRatio );
+	    			double curBasketXB = (int)curBasketX + titan1.getWidth() + (titan1.getWidth() * basketRatio );
+	    			
+	    			double curBasketYA = (int)curBasketY - (titan1.getHeight() * basketRatio );
+	    			double curBasketYB = (int)curBasketY + titan1.getHeight() + (titan1.getHeight() * basketRatio );
+	    			
+//Log.v("debug",basketRatio + "||" + arg0 + "|" + curBasketXA + "|" + curBasketXB + "||" + arg1 + "|" + curBasketYA + "|" + curBasketYB);
+	    			
+	    			if( ( curX > (float)curBasketXA && curX < (float)curBasketXB ) && ( curY > (float)curBasketYA && curY < (float)curBasketYB ) ){
+	    				initTitans(titan1,generateNumber(0,3));
+	    				
+	    				totalHits++;
+		    			gameScore.setText("SCORE : " + totalHits + " Minions");
+	    			}
+
+	    			canMoveNow = true;
+	    			
+	    			moveHuman((screenWidth/2), screenHeight - human.getHeight());
+	            }
+	        });
+	    	
+			AnimationSet animSet = new AnimationSet(true);
+			animSet.setFillAfter(true);
+			animSet.addAnimation(animationScale);
+			animSet.addAnimation(animationLoc);
+			
+			human.startAnimation(animSet);
+
+		}else{
+			Animation animation = new TranslateAnimation(previousX, arg0,0, 0);
+			
+			animation.setDuration(0);
+			animation.setFillAfter(true);
+			human.startAnimation(animation);
+		}
 		
 		previousX = arg0;
+		previousY = arg1;
+
 		
-		Animation animation = new TranslateAnimation(previousX, arg0,0, 0);
-		animation.setDuration(1);
-		animation.setFillAfter(true);
-		human.startAnimation(animation);
 	}
 	
 	public int generateNumber(int startFrom, int stopAt){
@@ -940,7 +1071,7 @@ public class MainActivity extends Activity implements OnGestureListener{
 	public boolean onScroll(MotionEvent arg0, MotionEvent arg1, float arg2,
 			float arg3) {
 		// TODO Auto-generated method stub
-		 moveHuman(arg1.getRawX());
+		 moveHuman(arg1.getRawX(),arg1.getRawY());	 
 		
 		return true;
 	}
