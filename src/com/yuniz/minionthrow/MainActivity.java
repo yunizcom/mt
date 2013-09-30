@@ -416,6 +416,7 @@ public class MainActivity extends Activity implements OnGestureListener{
 		boardNextBtn.setAdjustViewBounds(true);
 		boardPrevBtn.setAdjustViewBounds(true);
 		
+		human.setAdjustViewBounds(true);
 		titan1.setAdjustViewBounds(true);
 		
 		playBtn.setScaleType( ImageView.ScaleType.FIT_CENTER);
@@ -447,15 +448,15 @@ public class MainActivity extends Activity implements OnGestureListener{
 		switch(locations) {
 		    case 0:
 		        basketX = generateNumber(50,67);
-		        basketY = 75;
+		        basketY = 60;
 		        break;
 		    case 1:
 		    	basketX = generateNumber(43,70);
-		        basketY = 80;
+		        basketY = 70;
 		        break;
 		    case 2:
 		    	basketX = generateNumber(35,73);
-		        basketY = 90;
+		        basketY = 80;
 		        curScaleSize = 2;
 		        break;    
 		    default:
@@ -497,7 +498,9 @@ public class MainActivity extends Activity implements OnGestureListener{
 		curX = arg0;
 		curY = arg1;
 		
-		if((previousY - arg1) > 10 && arg1 < screenHeight){
+		double moveThanLimit = screenHeight * 0.1;
+		
+		if((previousY - arg1) > (int)moveThanLimit && arg1 < screenHeight){
 			canMoveNow = false;
 			int curScaleSize = 1;
 			
@@ -527,7 +530,7 @@ public class MainActivity extends Activity implements OnGestureListener{
 
 	            @Override
 	            public void onAnimationEnd(Animation animation) {
-	            	double curBasketX = ( (double)basketX - titan1.getWidth() ) / 100 * screenWidth;
+	            	/*double curBasketX = ( (double)basketX - titan1.getWidth() ) / 100 * screenWidth;
 	    			double curBasketY = ( (double)basketY - titan1.getHeight() ) / 100 * screenHeight - screenHeight;
 
 	    			double basketRatio = 0.5;
@@ -535,12 +538,23 @@ public class MainActivity extends Activity implements OnGestureListener{
 	    			double curBasketXB = (int)curBasketX + titan1.getWidth() + (titan1.getWidth() * basketRatio );
 	    			
 	    			double curBasketYA = (int)curBasketY - (titan1.getHeight() * basketRatio );
-	    			double curBasketYB = (int)curBasketY + titan1.getHeight() + (titan1.getHeight() * basketRatio );
+	    			double curBasketYB = (int)curBasketY + titan1.getHeight() + (titan1.getHeight() * basketRatio );*/
+	            	
+	            	double curXPercent = curX * 100 / screenWidth;
+	            	double curYPercent = 100 + (curY * 100 / screenHeight);
+	            	
+	            	double basketRatio = 10;
+	            	double curBasketXA = basketX - (basketRatio * 2);
+	    			double curBasketXB = basketX + basketRatio;
 	    			
-//Log.v("debug",basketRatio + "||" + arg0 + "|" + curBasketXA + "|" + curBasketXB + "||" + arg1 + "|" + curBasketYA + "|" + curBasketYB);
+	    			double curBasketYA = basketY - basketRatio;
+	    			double curBasketYB = basketY + basketRatio;
 	    			
-	    			if( ( curX > (float)curBasketXA && curX < (float)curBasketXB ) && ( curY > (float)curBasketYA && curY < (float)curBasketYB ) ){
-	    				initTitans(titan1,generateNumber(0,3));
+//Log.v("debug",basketRatio + "||" + curX + "|" + curBasketXA + "|" + curBasketXB + "||" + curY + "|" + curBasketYA + "|" + curBasketYB);
+Log.v("debug",basketRatio + "||" + curXPercent + "|" + curBasketXA + "|" + curBasketXB + "||" + curYPercent + "|" + curBasketYA + "|" + curBasketYB);  			
+	    			//if( ( curX > (float)curBasketXA && curX < (float)curBasketXB ) && ( curY > (float)curBasketYA && curY < (float)curBasketYB ) ){
+					if( ( curXPercent > (float)curBasketXA && curXPercent < (float)curBasketXB ) && ( curYPercent > (float)curBasketYA && curYPercent < (float)curBasketYB ) ){
+						initTitans(titan1,generateNumber(0,3));
 	    				
 	    				monionThrowSound();
 	    				
