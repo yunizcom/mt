@@ -448,15 +448,15 @@ public class MainActivity extends Activity implements OnGestureListener{
 		switch(locations) {
 		    case 0:
 		        basketX = generateNumber(50,67);
-		        basketY = 60;
+		        basketY = 70;
 		        break;
 		    case 1:
 		    	basketX = generateNumber(43,70);
-		        basketY = 70;
+		        basketY = 80;
 		        break;
 		    case 2:
 		    	basketX = generateNumber(35,73);
-		        basketY = 80;
+		        basketY = 90;
 		        curScaleSize = 2;
 		        break;    
 		    default:
@@ -544,7 +544,7 @@ public class MainActivity extends Activity implements OnGestureListener{
 	            	double curYPercent = 100 + (curY * 100 / screenHeight);
 	            	
 	            	double basketRatio = 10;
-	            	double curBasketXA = basketX - (basketRatio * 2);
+	            	double curBasketXA = basketX - basketRatio;
 	    			double curBasketXB = basketX + basketRatio;
 	    			
 	    			double curBasketYA = basketY - basketRatio;
