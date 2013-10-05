@@ -25,18 +25,27 @@
             android:layout_alignParentTop="true"
             android:src="@drawable/ic_launcher" />
 
-        <TextView
-            android:id="@+id/gameScore"
+        <ImageView
+            android:id="@+id/titanIcon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
             android:layout_alignParentRight="true"
+            android:layout_marginTop="14dp"
+            android:layout_marginRight="10dp"
+            android:src="@drawable/ic_launcher" />
+        
+        <TextView
+            android:id="@+id/gameScore"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toLeftOf="@+id/titanIcon"
             android:layout_marginTop="6dp"
             android:layout_marginRight="10dp"
-            android:text="SCORE : 0 Minions"
+            android:text="0 X"
             android:textColor="#e10f0f"
             android:textStyle="bold"
-            android:textSize="20dp" />
+            android:textSize="40dp" />
 
     </RelativeLayout>    
     

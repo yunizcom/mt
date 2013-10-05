@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Array;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,6 +36,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.AssetFileDescriptor;
+import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
@@ -53,6 +55,7 @@ import android.view.animation.ScaleAnimation;
 import android.view.animation.TranslateAnimation;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ImageView.ScaleType;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -103,6 +106,8 @@ public class MainActivity extends Activity implements OnGestureListener{
 	private ImageView playBtn2;
 	private ImageView openHallOfFameBtn;
 	private ImageView quit2Btn;
+	
+	private ImageView titanIcon;
 	
 	private ImageView boardNextBtn;
 	private ImageView boardPrevBtn;
@@ -203,6 +208,8 @@ public class MainActivity extends Activity implements OnGestureListener{
 		playBtn2 = (ImageView) findViewById(R.id.playBtn2);
 		openHallOfFameBtn = (ImageView) findViewById(R.id.openHallOfFameBtn);
 		quit2Btn = (ImageView) findViewById(R.id.quit2Btn);
+		
+		titanIcon = (ImageView) findViewById(R.id.titanIcon);
 		
 		boardNextBtn = (ImageView) findViewById(R.id.boardNextBtn);
 		boardPrevBtn = (ImageView) findViewById(R.id.boardPrevBtn);
@@ -319,6 +326,10 @@ public class MainActivity extends Activity implements OnGestureListener{
 		    ims1 = getAssets().open("minion_7.png");
 		    d1 = Drawable.createFromStream(ims1, null);
 		    human.setImageDrawable(d1);
+		    
+		    ims1 = getAssets().open("dustbin.png");
+		    d1 = Drawable.createFromStream(ims1, null);
+		    titanIcon.setImageDrawable(d1);
 		}
 		catch(IOException ex) 
 		{
@@ -397,12 +408,17 @@ public class MainActivity extends Activity implements OnGestureListener{
 		human.setMinimumWidth((int)setNewWidth);
 		human.setMaxWidth((int)setNewWidth);
 		
-		setNewWidth = screenWidth * 0.05;
-		setNewHeight = screenHeight * 0.1;
+		setNewWidth = screenWidth * 0.1;
+		setNewHeight = screenHeight * 0.2;
 		titan1.setMinimumHeight((int)setNewHeight);
 		titan1.setMaxHeight((int)setNewHeight);
 		titan1.setMinimumWidth((int)setNewWidth);
 		titan1.setMaxWidth((int)setNewWidth);
+		
+		titanIcon.setMinimumHeight((int)setNewHeight);
+		titanIcon.setMaxHeight((int)setNewHeight);
+		titanIcon.setMinimumWidth((int)setNewWidth);
+		titanIcon.setMaxWidth((int)setNewWidth);
 
 		playBtn.setAdjustViewBounds(true);
 		quitBtn.setAdjustViewBounds(true);
@@ -419,6 +435,8 @@ public class MainActivity extends Activity implements OnGestureListener{
 		human.setAdjustViewBounds(true);
 		titan1.setAdjustViewBounds(true);
 		
+		titanIcon.setAdjustViewBounds(true);
+		
 		playBtn.setScaleType( ImageView.ScaleType.FIT_CENTER);
 		quitBtn.setScaleType( ImageView.ScaleType.FIT_CENTER);
 		startBtn.setScaleType( ImageView.ScaleType.FIT_CENTER);
@@ -431,9 +449,11 @@ public class MainActivity extends Activity implements OnGestureListener{
 		boardNextBtn.setScaleType( ImageView.ScaleType.FIT_CENTER);
 		boardPrevBtn.setScaleType( ImageView.ScaleType.FIT_CENTER);
 		
-		human.setScaleType( ImageView.ScaleType.FIT_CENTER);
+		human.setScaleType( ImageView.ScaleType.FIT_XY);
 		
-		titan1.setScaleType( ImageView.ScaleType.FIT_CENTER);
+		titan1.setScaleType( ImageView.ScaleType.FIT_XY);
+		
+		titanIcon.setScaleType( ImageView.ScaleType.FIT_CENTER);
 		//----------auto Adjust UI Elements size----------
 		
 		gDetector = new GestureDetector(this);
@@ -445,40 +465,52 @@ public class MainActivity extends Activity implements OnGestureListener{
 		
 		int curScaleSize = 1;
 		
+		double setNewWidth = screenWidth * 0.1;
+		double setNewHeight = screenHeight * 0.2;
+		
 		switch(locations) {
 		    case 0:
 		        basketX = generateNumber(50,67);
-		        basketY = 70;
+		        basketY = generateNumber(65,75);
 		        break;
 		    case 1:
 		    	basketX = generateNumber(43,70);
-		        basketY = 80;
+		        basketY = generateNumber(65,75);
 		        break;
 		    case 2:
 		    	basketX = generateNumber(35,73);
-		        basketY = 90;
+		        basketY = generateNumber(75,85);
 		        curScaleSize = 2;
+		        
+		        setNewWidth = screenWidth * 0.2;
+				setNewHeight = screenHeight * 0.4;
+		        
 		        break;    
 		    default:
 		    	basketX = generateNumber(40,70);
 		        basketY = generateNumber(70,80);
 		}
 		
+		titan1.setMinimumHeight((int)setNewHeight);
+		titan1.setMaxHeight((int)setNewHeight);
+		titan1.setMinimumWidth((int)setNewWidth);
+		titan1.setMaxWidth((int)setNewWidth);
+		
 		int arg0 = (screenWidth / 100) * basketX;
 		int arg2 = (screenHeight / 100) * basketY;
 		
 		arg0 = arg0 - ( titanSelect.getWidth() / 2);
 		arg2 = arg2 - ( titanSelect.getHeight() / 2);
-		
-		Animation animationScale = new ScaleAnimation(curScaleSize, ( curScaleSize + 1 ), curScaleSize, ( curScaleSize + 1 ), Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.9f);
-    	animationScale.setDuration(0);
+
+		//Animation animationScale = new ScaleAnimation(curScaleSize, ( curScaleSize + 1 ), curScaleSize, ( curScaleSize + 1 ), Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.9f);
+    	//animationScale.setDuration(0);
 
     	Animation animationLoc = new TranslateAnimation(arg0, arg0,arg2, arg2);
     	animationLoc.setDuration(0);
 
 		AnimationSet animSet = new AnimationSet(true);
 		animSet.setFillAfter(true);
-		animSet.addAnimation(animationScale);
+		//animSet.addAnimation(animationScale);
 		animSet.addAnimation(animationLoc);
 		
 		titanSelect.startAnimation(animSet);
@@ -540,18 +572,18 @@ public class MainActivity extends Activity implements OnGestureListener{
 	    			double curBasketYA = (int)curBasketY - (titan1.getHeight() * basketRatio );
 	    			double curBasketYB = (int)curBasketY + titan1.getHeight() + (titan1.getHeight() * basketRatio );*/
 	            	
-	            	double curXPercent = curX * 100 / screenWidth;
-	            	double curYPercent = 100 + (curY * 100 / screenHeight);
+	            	double curXPercent = ((curX + (human.getWidth()/2))) * 100 / screenWidth;
+	            	double curYPercent = 100 + ((curY - (human.getHeight()/2)) * 100 / screenHeight);
 	            	
 	            	double basketRatio = 10;
 	            	double curBasketXA = basketX - basketRatio;
 	    			double curBasketXB = basketX + basketRatio;
 	    			
-	    			double curBasketYA = basketY - basketRatio;
-	    			double curBasketYB = basketY + basketRatio;
-	    			
+	    			double curBasketYA = basketY - 10 - basketRatio;
+	    			double curBasketYB = basketY - 10;
+	    			  						
 //Log.v("debug",basketRatio + "||" + curX + "|" + curBasketXA + "|" + curBasketXB + "||" + curY + "|" + curBasketYA + "|" + curBasketYB);
-Log.v("debug",basketRatio + "||" + curXPercent + "|" + curBasketXA + "|" + curBasketXB + "||" + curYPercent + "|" + curBasketYA + "|" + curBasketYB);  			
+Log.v("debug",titan1.getHeight() + "||" + basketRatio + "||" + curXPercent + "|" + curBasketXA + "|" + curBasketXB + "||" + curYPercent + "|" + curBasketYA + "|" + curBasketYB);  			
 	    			//if( ( curX > (float)curBasketXA && curX < (float)curBasketXB ) && ( curY > (float)curBasketYA && curY < (float)curBasketYB ) ){
 					if( ( curXPercent > (float)curBasketXA && curXPercent < (float)curBasketXB ) && ( curYPercent > (float)curBasketYA && curYPercent < (float)curBasketYB ) ){
 						initTitans(titan1,generateNumber(0,3));
@@ -559,7 +591,7 @@ Log.v("debug",basketRatio + "||" + curXPercent + "|" + curBasketXA + "|" + curBa
 	    				monionThrowSound();
 	    				
 	    				totalHits++;
-		    			gameScore.setText("SCORE : " + totalHits + " Minions");
+		    			gameScore.setText(totalHits + " X");
 	    			}
 
 	    			reFreshMinions();
@@ -807,7 +839,7 @@ Log.v("debug",basketRatio + "||" + curXPercent + "|" + curBasketXA + "|" + curBa
 			Toast.makeText(getApplicationContext(), "You need internet connection to open Hall Of Fame." , Toast.LENGTH_LONG).show();
 		}else{
 			totalHits = 0;
-			gameScore.setText("SCORE : 0 Minions");
+			gameScore.setText("0 X");
 			
 			gameMenu.setVisibility(View.INVISIBLE);
 			hallOfFameBoard.setVisibility(View.VISIBLE);
@@ -883,7 +915,7 @@ Log.v("debug",basketRatio + "||" + curXPercent + "|" + curBasketXA + "|" + curBa
 		buttonClicks();
 		
 		totalHits = 0;
-		gameScore.setText("SCORE : 0 Minions");
+		gameScore.setText("0 X");
 		
 		gameOver.setVisibility(View.INVISIBLE);
 		gameStage_human.setVisibility(View.VISIBLE);
@@ -908,7 +940,7 @@ Log.v("debug",basketRatio + "||" + curXPercent + "|" + curBasketXA + "|" + curBa
 		buttonClicks();
 		
 		totalHits = 0;
-		gameScore.setText("SCORE : 0 Minions");
+		gameScore.setText("0 X");
 		
 		gameMenu.setVisibility(View.INVISIBLE);
 		gameIntro.setVisibility(View.VISIBLE);
