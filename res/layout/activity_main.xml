@@ -26,12 +26,22 @@
             android:src="@drawable/ic_launcher" />
 
         <ImageView
-            android:id="@+id/titanIcon"
+            android:id="@+id/saveNowBtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
             android:layout_alignParentRight="true"
-            android:layout_marginTop="14dp"
+            android:layout_marginTop="1dp"
+            android:layout_marginRight="1dp"
+            android:onClick="saveNowBtn"
+            android:src="@drawable/ic_launcher" />
+        
+        <ImageView
+            android:id="@+id/titanIcon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toLeftOf="@+id/saveNowBtn"
+            android:layout_marginTop="10dp"
             android:layout_marginRight="10dp"
             android:src="@drawable/ic_launcher" />
         
@@ -40,9 +50,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_toLeftOf="@+id/titanIcon"
-            android:layout_marginTop="6dp"
+            android:layout_marginTop="2dp"
             android:layout_marginRight="10dp"
-            android:text="0 X"
+            android:text="0 x"
             android:textColor="#e10f0f"
             android:textStyle="bold"
             android:textSize="40dp" />
@@ -105,8 +115,8 @@
             android:id="@+id/rePlayBtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
             android:layout_below="@+id/submitBtn"
-            android:layout_toRightOf="@+id/quit2Btn"
             android:onClick="rePlayBtn"
             android:src="@drawable/ic_launcher" />
         
@@ -115,7 +125,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
-            android:layout_below="@+id/submitBtn"
+            android:layout_below="@+id/rePlayBtn"
             android:onClick="quitBtn"
             android:src="@drawable/ic_launcher" />
         

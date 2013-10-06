@@ -10,7 +10,6 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.Timer;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -35,6 +34,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.AssetFileDescriptor;
 import android.graphics.Matrix;
 import android.graphics.Point;
@@ -61,6 +61,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class MainActivity extends Activity implements OnGestureListener{
+	
+	public static final String PREFS_NAME = "YunizMtSaves";
 	
 	public int screenWidth = 0;
 	public int screenHeight = 0;
@@ -106,6 +108,7 @@ public class MainActivity extends Activity implements OnGestureListener{
 	private ImageView playBtn2;
 	private ImageView openHallOfFameBtn;
 	private ImageView quit2Btn;
+	private ImageView saveNowBtn;
 	
 	private ImageView titanIcon;
 	
@@ -155,8 +158,6 @@ public class MainActivity extends Activity implements OnGestureListener{
 	private GestureDetector gDetector;
 	
 	MediaPlayer bgMusic,clickEffect,throwEffect;
-	
-	Timer t = new Timer();
 	
 	@SuppressLint("NewApi")
 	@Override
@@ -208,6 +209,7 @@ public class MainActivity extends Activity implements OnGestureListener{
 		playBtn2 = (ImageView) findViewById(R.id.playBtn2);
 		openHallOfFameBtn = (ImageView) findViewById(R.id.openHallOfFameBtn);
 		quit2Btn = (ImageView) findViewById(R.id.quit2Btn);
+		saveNowBtn = (ImageView) findViewById(R.id.saveNowBtn);
 		
 		titanIcon = (ImageView) findViewById(R.id.titanIcon);
 		
@@ -330,6 +332,10 @@ public class MainActivity extends Activity implements OnGestureListener{
 		    ims1 = getAssets().open("dustbin.png");
 		    d1 = Drawable.createFromStream(ims1, null);
 		    titanIcon.setImageDrawable(d1);
+		    
+		    ims1 = getAssets().open("submitBtn.png");
+		    d1 = Drawable.createFromStream(ims1, null);
+		    saveNowBtn.setImageDrawable(d1);
 		}
 		catch(IOException ex) 
 		{
@@ -372,6 +378,11 @@ public class MainActivity extends Activity implements OnGestureListener{
 		submitBtn.setMaxHeight((int)setNewHeight);
 		submitBtn.setMinimumWidth((int)setNewWidth);
 		submitBtn.setMaxWidth((int)setNewWidth);
+		
+		saveNowBtn.setMinimumHeight((int)setNewHeight);
+		saveNowBtn.setMaxHeight((int)setNewHeight);
+		saveNowBtn.setMinimumWidth((int)setNewWidth);
+		saveNowBtn.setMaxWidth((int)setNewWidth);
 		
 		openHallOfFameBtn.setMinimumHeight((int)setNewHeight);
 		openHallOfFameBtn.setMaxHeight((int)setNewHeight);
@@ -428,6 +439,7 @@ public class MainActivity extends Activity implements OnGestureListener{
 		playBtn2.setAdjustViewBounds(true);
 		openHallOfFameBtn.setAdjustViewBounds(true);
 		quit2Btn.setAdjustViewBounds(true);
+		saveNowBtn.setAdjustViewBounds(true);
 		
 		boardNextBtn.setAdjustViewBounds(true);
 		boardPrevBtn.setAdjustViewBounds(true);
@@ -445,6 +457,7 @@ public class MainActivity extends Activity implements OnGestureListener{
 		playBtn2.setScaleType( ImageView.ScaleType.FIT_CENTER);
 		openHallOfFameBtn.setScaleType( ImageView.ScaleType.FIT_CENTER);
 		quit2Btn.setScaleType( ImageView.ScaleType.FIT_CENTER);
+		saveNowBtn.setScaleType( ImageView.ScaleType.FIT_CENTER);
 		
 		boardNextBtn.setScaleType( ImageView.ScaleType.FIT_CENTER);
 		boardPrevBtn.setScaleType( ImageView.ScaleType.FIT_CENTER);
@@ -459,6 +472,8 @@ public class MainActivity extends Activity implements OnGestureListener{
 		gDetector = new GestureDetector(this);
 		
 		initTitans(titan1,generateNumber(0,3));
+		
+		retriveScoreValue();
 	}
 
 	public void initTitans(ImageView titanSelect, int locations){
@@ -502,15 +517,12 @@ public class MainActivity extends Activity implements OnGestureListener{
 		arg0 = arg0 - ( titanSelect.getWidth() / 2);
 		arg2 = arg2 - ( titanSelect.getHeight() / 2);
 
-		//Animation animationScale = new ScaleAnimation(curScaleSize, ( curScaleSize + 1 ), curScaleSize, ( curScaleSize + 1 ), Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.9f);
-    	//animationScale.setDuration(0);
-
     	Animation animationLoc = new TranslateAnimation(arg0, arg0,arg2, arg2);
     	animationLoc.setDuration(0);
 
 		AnimationSet animSet = new AnimationSet(true);
 		animSet.setFillAfter(true);
-		//animSet.addAnimation(animationScale);
+
 		animSet.addAnimation(animationLoc);
 		
 		titanSelect.startAnimation(animSet);
@@ -536,12 +548,6 @@ public class MainActivity extends Activity implements OnGestureListener{
 			canMoveNow = false;
 			int curScaleSize = 1;
 			
-			/*if(arg0 > (screenWidth/2)){
-				arg0 = arg0 - (screenWidth / 100 * 20);
-			}else{
-				arg0 = arg0 + (screenWidth / 100 * 20);
-			}*/
-			
 			Animation animationScale = new ScaleAnimation(( curScaleSize + 1 ), (int)(curScaleSize * 0.5), ( curScaleSize + 1 ), (int)(curScaleSize * 0.5), Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.9f);
 	    	animationScale.setDuration(500);
 
@@ -562,16 +568,6 @@ public class MainActivity extends Activity implements OnGestureListener{
 
 	            @Override
 	            public void onAnimationEnd(Animation animation) {
-	            	/*double curBasketX = ( (double)basketX - titan1.getWidth() ) / 100 * screenWidth;
-	    			double curBasketY = ( (double)basketY - titan1.getHeight() ) / 100 * screenHeight - screenHeight;
-
-	    			double basketRatio = 0.5;
-	    			double curBasketXA = (int)curBasketX - (titan1.getWidth() * basketRatio );
-	    			double curBasketXB = (int)curBasketX + titan1.getWidth() + (titan1.getWidth() * basketRatio );
-	    			
-	    			double curBasketYA = (int)curBasketY - (titan1.getHeight() * basketRatio );
-	    			double curBasketYB = (int)curBasketY + titan1.getHeight() + (titan1.getHeight() * basketRatio );*/
-	            	
 	            	double curXPercent = ((curX + (human.getWidth()/2))) * 100 / screenWidth;
 	            	double curYPercent = 100 + ((curY - (human.getHeight()/2)) * 100 / screenHeight);
 	            	
@@ -582,16 +578,15 @@ public class MainActivity extends Activity implements OnGestureListener{
 	    			double curBasketYA = basketY - 10 - basketRatio;
 	    			double curBasketYB = basketY - 10;
 	    			  						
-//Log.v("debug",basketRatio + "||" + curX + "|" + curBasketXA + "|" + curBasketXB + "||" + curY + "|" + curBasketYA + "|" + curBasketYB);
-Log.v("debug",titan1.getHeight() + "||" + basketRatio + "||" + curXPercent + "|" + curBasketXA + "|" + curBasketXB + "||" + curYPercent + "|" + curBasketYA + "|" + curBasketYB);  			
-	    			//if( ( curX > (float)curBasketXA && curX < (float)curBasketXB ) && ( curY > (float)curBasketYA && curY < (float)curBasketYB ) ){
-					if( ( curXPercent > (float)curBasketXA && curXPercent < (float)curBasketXB ) && ( curYPercent > (float)curBasketYA && curYPercent < (float)curBasketYB ) ){
+	    			if( ( curXPercent > (float)curBasketXA && curXPercent < (float)curBasketXB ) && ( curYPercent > (float)curBasketYA && curYPercent < (float)curBasketYB ) ){
 						initTitans(titan1,generateNumber(0,3));
 	    				
 	    				monionThrowSound();
 	    				
 	    				totalHits++;
-		    			gameScore.setText(totalHits + " X");
+		    			gameScore.setText(totalHits + " x");
+		    			
+		    			saveScoreValue();
 	    			}
 
 	    			reFreshMinions();
@@ -627,6 +622,19 @@ Log.v("debug",titan1.getHeight() + "||" + basketRatio + "||" + curXPercent + "|"
 		previousY = arg1;
 
 		
+	}
+	
+	public void saveScoreValue(){
+		  SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+	      SharedPreferences.Editor editor = settings.edit();
+	      editor.putInt("lastScores", totalHits);
+
+	      editor.commit();
+	}
+	
+	public void retriveScoreValue(){
+		SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+		totalHits = settings.getInt("lastScores", 0);
 	}
 	
 	public void reFreshMinions(){
@@ -737,7 +745,7 @@ Log.v("debug",titan1.getHeight() + "||" + basketRatio + "||" + curXPercent + "|"
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		String url = "http://www.yuniz.com/apps/aot/?mod=1&nickname=" + nickname + "&score=" + scores;
+		String url = "http://www.yuniz.com/apps/mt/?mod=1&nickname=" + nickname + "&score=" + scores;
 		//-------load JSON
 		List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
         //nameValuePairs.add(new BasicNameValuePair("convo_id", "4546db1fd1"));
@@ -756,6 +764,9 @@ Log.v("debug",titan1.getHeight() + "||" + basketRatio + "||" + curXPercent + "|"
 				
 				gameOver.setVisibility(View.INVISIBLE);
 				hallOfFameBoard.setVisibility(View.VISIBLE);
+				
+				totalHits = 0;
+				saveScoreValue();
 			}
 			
 		} catch (JSONException e) {
@@ -766,7 +777,7 @@ Log.v("debug",titan1.getHeight() + "||" + basketRatio + "||" + curXPercent + "|"
 	}
 	
 	public void gameScoresAPI(String pages){
-		String url = "http://www.yuniz.com/apps/aot/?mod=2&page=" + pages;
+		String url = "http://www.yuniz.com/apps/mt/?mod=2&page=" + pages;
 		//-------load JSON
 		List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
         //nameValuePairs.add(new BasicNameValuePair("convo_id", "4546db1fd1"));
@@ -838,8 +849,7 @@ Log.v("debug",titan1.getHeight() + "||" + basketRatio + "||" + curXPercent + "|"
 		if(!isNetworkAvailable()){
 			Toast.makeText(getApplicationContext(), "You need internet connection to open Hall Of Fame." , Toast.LENGTH_LONG).show();
 		}else{
-			totalHits = 0;
-			gameScore.setText("0 X");
+			gameScore.setText(totalHits + " x");
 			
 			gameMenu.setVisibility(View.INVISIBLE);
 			hallOfFameBoard.setVisibility(View.VISIBLE);
@@ -894,13 +904,27 @@ Log.v("debug",titan1.getHeight() + "||" + basketRatio + "||" + curXPercent + "|"
 	}
 	
 	public void gameOver(){
-		t.cancel();
-		
-		resultTxt.setText(gameScore.getText());
+
+		resultTxt.setText(totalHits + " minions threw!");
 		
 		gameStage_human.setVisibility(View.INVISIBLE);
 		gameStage1.setVisibility(View.INVISIBLE);
 		gameOver.setVisibility(View.VISIBLE);
+	}
+	
+	public void saveNowBtn(View v) {
+		buttonClicks();
+		
+		gameOver();
+	}
+	
+	public void playBtn2(View v) {
+		buttonClicks();
+		
+		gameScore.setText(totalHits + " x");
+		
+		hallOfFameBoard.setVisibility(View.INVISIBLE);
+		gameIntro.setVisibility(View.VISIBLE);
 	}
 	
 	public void startBtn(View v) {
@@ -914,8 +938,7 @@ Log.v("debug",titan1.getHeight() + "||" + basketRatio + "||" + curXPercent + "|"
 	public void rePlayBtn(View v) {
 		buttonClicks();
 		
-		totalHits = 0;
-		gameScore.setText("0 X");
+		gameScore.setText(totalHits + " x");
 		
 		gameOver.setVisibility(View.INVISIBLE);
 		gameStage_human.setVisibility(View.VISIBLE);
@@ -939,8 +962,7 @@ Log.v("debug",titan1.getHeight() + "||" + basketRatio + "||" + curXPercent + "|"
 	public void playBtn(View v) {
 		buttonClicks();
 		
-		totalHits = 0;
-		gameScore.setText("0 X");
+		gameScore.setText(totalHits + " x");
 		
 		gameMenu.setVisibility(View.INVISIBLE);
 		gameIntro.setVisibility(View.VISIBLE);
@@ -1111,9 +1133,7 @@ Log.v("debug",titan1.getHeight() + "||" + basketRatio + "||" + curXPercent + "|"
 	protected void onDestroy() {
 	 // TODO Auto-generated method stub
 	 super.onDestroy();
-	 
-	 t.cancel();
-	 
+
 	 bgMusic.stop();
 	 bgMusic.release();
 	 
