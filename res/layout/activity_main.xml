@@ -1,4 +1,5 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:ads= "http://schemas.android.com/apk/lib/com.google.ads"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -577,6 +578,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
             android:layout_centerHorizontal="true"
+            android:layout_marginBottom="50dp"
             android:background="@null"
             android:minHeight="10dp"
             android:onClick="openURL"
@@ -611,6 +613,17 @@
             android:layout_above="@+id/button3"
             android:onClick="openHallOfFameBtn"
             android:src="@drawable/ic_launcher" />
+        
+        <com.google.ads.AdView 
+	        android:id="@+id/adView" 
+	        android:layout_width="wrap_content" 
+	        android:layout_height="wrap_content"
+	        android:layout_alignParentLeft="true" 
+	        android:layout_alignParentBottom="true" 
+	        ads:adSize="SMART_BANNER" 
+	        ads:adUnitId="a15268ca278ce83" 
+	        ads:loadAdOnCreate="true" > 
+	    </com.google.ads.AdView>
 
     </RelativeLayout>
     
