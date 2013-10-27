@@ -46,6 +46,7 @@ import android.view.Menu;
 import android.view.MotionEvent;
 import android.view.OrientationEventListener;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.GestureDetector.OnGestureListener;
 import android.view.animation.Animation;
@@ -59,6 +60,13 @@ import android.widget.ImageView.ScaleType;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import android.os.Bundle;
+import android.app.Activity;
+import android.view.View;
+import com.revmob.RevMob;
+import com.revmob.RevMobTestingMode;
+import com.revmob.ads.banner.RevMobBanner;
 
 public class MainActivity extends Activity implements OnGestureListener{
 	
@@ -158,6 +166,8 @@ public class MainActivity extends Activity implements OnGestureListener{
 	private GestureDetector gDetector;
 	
 	MediaPlayer bgMusic,clickEffect,throwEffect;
+	
+	private RevMob revmob;
 	
 	@SuppressLint("NewApi")
 	@Override
@@ -474,6 +484,16 @@ public class MainActivity extends Activity implements OnGestureListener{
 		initTitans(titan1,generateNumber(0,3));
 		
 		retriveScoreValue();
+		
+		/*----RevMob Ads----*/
+		revmob = RevMob.start(this);
+//revmob.setTestingMode(RevMobTestingMode.WITH_ADS);
+		revmob.showFullscreen(this);
+		
+		RevMobBanner banner = revmob.createBanner(this);
+        ViewGroup view = (ViewGroup) findViewById(R.id.adbanner);
+        view.addView(banner);
+        /*----RevMob Ads----*/
 	}
 
 	public void initTitans(ImageView titanSelect, int locations){
@@ -856,6 +876,8 @@ public class MainActivity extends Activity implements OnGestureListener{
 			
 			gameScoresAPI(curPage);
 		}
+		
+		revmob.showFullscreen(this);
 	}
 	
 	public void boardNextBtn(View v) {
@@ -900,6 +922,8 @@ public class MainActivity extends Activity implements OnGestureListener{
 	}
 	
 	public void quitBtn(View v) {
+		revmob.showFullscreen(this);
+		
 		finish();
 	}
 	
@@ -966,6 +990,8 @@ public class MainActivity extends Activity implements OnGestureListener{
 		
 		gameMenu.setVisibility(View.INVISIBLE);
 		gameIntro.setVisibility(View.VISIBLE);
+		
+		revmob.showFullscreen(this);
 	}
 	
 	public void buttonClicks(){
@@ -1164,7 +1190,7 @@ public class MainActivity extends Activity implements OnGestureListener{
 		if(!bgMusic.isPlaying()){
 			bgMusic.start();
 		}
-		
+
 		super.onResume();
 	}
 	
